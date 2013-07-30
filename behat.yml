@@ -1,13 +1,11 @@
 default:
   context:
-    class:  'FeatureContext'
-    parameters:  
+    parameters:
       wd_host: 'http://127.0.0.1:4444/wd/hub'
-      wd_capabilities: 
-        "browser": "firefox"
   extensions:
     Behat\MinkExtension\Extension:
       base_url:  'http://en.wikipedia.org/'
       selenium2: ~
       default_session: selenium2
       javascript_session: selenium2
+      browser_name: firefox

@@ -10,12 +10,15 @@ use Behat\Gherkin\Node\PyStringNode,
 use Behat\MinkExtension\Context\MinkContext,
     Behat\Mink\Driver\Selenium2Driver,
     Behat\Mink\Session,
-    \Behat\Mink\Mink;
+    Behat\Mink\WebAssert,
+    Behat\Mink\Mink;
 /**
  * Features context.
  */
 class FeatureContext extends MinkContext
 {
+    private static $session;
+
     /**
      * Initializes context.
      * Every scenario gets it's own context object.
@@ -24,30 +27,43 @@ class FeatureContext extends MinkContext
      */
     public function __construct(array $parameters)
     {
-        $driver = new \Behat\Mink\Driver\Selenium2Driver(
-            $parameters['wd_capabilities']['browser'], 
-            $parameters['wd_capabilities'], 
-            $parameters['wd_host']
-        );
-
-        // init session:
-        $session = new \Behat\Mink\Session($driver);
-
-        $mink = new Mink(array($session));
-
-
-        $this->setMink($mink);
+        if (!self::$session) {
+            self::$session = new Session($this->getDriver($parameters));
+            self::$session->start();
+        }
     }
 
-//
-// Place your definition and hook methods here:
-//
-//    /**
-//     * @Given /^I have done something with "([^"]*)"$/
-//     */
-//    public function iHaveDoneSomethingWith($argument)
-//    {
-//        doSomethingWith($argument);
-//    }
-//
+    private function getDriver(array $parameters)
+    {
+        return new Selenium2Driver(
+            'firefox',
+            array(
+                'version'        => 'ANY',
+                'platform'       => 'ANY',
+                'browserVersion' => 'ANY',
+                'browser'        => 'firefox'
+            ),
+            $parameters['wd_host']
+        );
+    }
+
+    public function getSession()
+    {
+        return self::$session;
+    }
+
+    /**
+     * Returns session asserter.
+     *
+     * @param Session|string $session session object or name
+     *
+     * @return WebAssert
+     */
+    public function assertSession($session = null)
+    {
+        if (!($session instanceof Session)) {
+            $session = $this->getSession($session);
+        }
+        return new WebAssert($session);
+    }
 }
