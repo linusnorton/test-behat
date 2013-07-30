@@ -3,11 +3,11 @@
 use Behat\Behat\Context\ClosuredContextInterface,
     Behat\Behat\Context\TranslatedContextInterface,
     Behat\Behat\Context\BehatContext,
-    Behat\Behat\Exception\PendingException;
-use Behat\Gherkin\Node\PyStringNode,
-    Behat\Gherkin\Node\TableNode;
-
-use Behat\MinkExtension\Context\MinkContext,
+    Behat\Behat\Exception\PendingException,
+    Behat\Behat\Event\SuiteEvent,
+    Behat\Gherkin\Node\PyStringNode,
+    Behat\Gherkin\Node\TableNode,
+    Behat\MinkExtension\Context\MinkContext,
     Behat\Mink\Driver\Selenium2Driver,
     Behat\Mink\Session,
     Behat\Mink\WebAssert,
@@ -47,6 +47,9 @@ class FeatureContext extends MinkContext
         );
     }
 
+    /**
+     * @return Session
+     */
     public function getSession()
     {
         return self::$session;
@@ -65,5 +68,20 @@ class FeatureContext extends MinkContext
             $session = $this->getSession($session);
         }
         return new WebAssert($session);
+    }
+
+    /**
+     * Tear down method to clean up our browser session etc.
+     *
+     * @AfterSuite
+     *
+     * @param Behat\Behat\Event\SuiteEvent $event
+     */
+    public static function teardown(SuiteEvent $event = null)
+    {
+        if (self::$session) {
+            self::$session->stop();
+            self::$session = null;
+        }
     }
 }
